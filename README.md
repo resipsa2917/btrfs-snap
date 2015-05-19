@@ -1,7 +1,3 @@
-btrfs-snap
-==========
-
-btrfs-snap creates and maintains the history of snapshots of btrfs filesystems.
 btrfs-snappy
 ============
 
