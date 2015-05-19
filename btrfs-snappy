@@ -262,7 +262,7 @@ changes=`/sbin/btrfs subvolume find-new ${mountPoint} $OLD_TRANSID`
 IFS="$oldIFS"
 
 #echo "${changes}"
-count=$(grep -o "inode" <<< "$changes" | wc -l)
+count=$(grep -o "inode" <<< "${changes}" | wc -l)
 echo "$count changes... "
 
 #######################################################################
