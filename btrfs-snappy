@@ -250,7 +250,7 @@ echo "LastSnapshot TransID is $OLD_TRANSID"
 echo "Comparing MountPoint and LastSnapshot..."
 
 ##########################################################
-### Count Changes Between MountPoint and LastSnapshot  ###
+### Count Changes Between MountPoint And LastSnapshot  ###
 ##########################################################
 
 oldIFS="$IFS"
