@@ -1,0 +1,274 @@
+#!/bin/bash
+
+PATH=/usr/lib64/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+
+#
+# btrfs-snappy - make snapshots of a BtrFS mountpoint or subvolume ONLY when there are new or changed files NOT deleted files or renamed files
+#
+# Copyright (C) 2010 Birger Monsen birger@birger.sh
+# Copyright (C) 2013 James FitzGibbon james@nadt.net
+# Copyright (C) 2014 Brian Kloppenberg
+# Copyright (C) 2015 David Carriere redwoodcare@hotmail.com
+#
+# This program is distributed under the GNU General Public License
+# http://www.gnu.org/licenses/gpl.txt
+#
+
+################################
+### Allow for spaces in path ###
+################################
+
+IFS=""
+
+#################
+### Functions ###
+#################
+
+createSnapshot() 
+{
+		out="/sbin/btrfs subvol snapshot ${readonly} '${mountPoint}' '${base}/${snapname}' 2>&1"
+		#echo "Executing $out"
+		eval $out
+		
+		#$out="/usr/bin/touch '${base}/${snapname}' 2>&1"
+		#eval $out
+
+	if [ $? -eq 0 ] ; then
+		logger -p ${LOG_FACILITY}.info -t ${prog} "${out}"
+	else
+		logger -p ${LOG_FACILITY}.err -t ${prog} "${out}"
+	fi
+}
+
+deleteOlderSnapshots()
+{
+	echo "Deleting old snapshots from $snapshotWildcardPath..."
+	ls -dr $snapshotWildcardPath | tail -n +${cnt} | while read snap ; do
+		echo "Deleting ${snap}"
+		out=`/sbin/btrfs subvolume delete ${snap} 2>&1`
+	if [ $? -eq 0 ] ; then
+		logger -p ${LOG_FACILITY}.info -t ${prog} "${out}"
+	else
+		logger -p ${LOG_FACILITY}.err -t ${prog} "${out}"
+	fi
+	done
+}
+
+syncBtrfs()
+{
+	echo "Syncing BtrFS..."
+	/usr/bin/sync
+}
+
+#############
+### Usage ###
+#############
+
+LOG_FACILITY=local0
+VERSION="1.0"
+prog=${0##*/}
+
+USAGE="
+Usage: ${prog} -h for usage help
+       ${prog} -v for version
+       ${prog} [options] <mountpoint> <prefix> <count>
+	   "
+
+SYNOPSIS="
+${prog} [options] <mountpoint> <prefix> <count>
+
+<mountpoint> is the mountpoint of the btrfs file system to make a
+             snapshot of
+			 
+<prefix>     is the prefix to be used in the name of the snapshot.
+             E.g. hourly, daily, weekly...
+             If prefix=VFS a Samba vfs_shadow_copy snapshot naming convention
+             will be used (@GMT-%Y.%m.%d-%H.%M.%S).
+			 
+<count>      The number of snapshots with the given prefix to keep.
+
+Example:
+
+btrfs-snappy / hourly 24
+
+would make a snapshot in /.snapshots called hourly_<date>_<time>
+where <date> is on the form YYYY-MM-DD and <time> is on the form
+HH.MM.SS. This format makes shure snapshot names sort correctly in
+cronological order even when sorted alphabetically. The 24 newest
+snapshots matching the prefix are kept around. The rest are deleted.
+if '-r' is given, snapshots are created read only
+if '-b dir' is given, snapshots are created rooted in dir, with a directory
+structure that mimics the source.
+
+Example usage for a system with 2 btrfs file systems mounted as
+/ and /home (remember to make these scripts executable):
+
+/etc/cron.hourly/btrfs-snappy
+#!/bin/bash
+${0} / hourly 24
+${0} /home hourly 24
+
+/etc/cron.daily/btrfs-snappy
+#!/bin/bash
+${0} / daily 7
+${0} /home daily 7
+
+/etc/cron.weekly/btrfs-snappy
+#!/bin/bash
+${0} /home weekly 4
+"
+
+base=""
+readonly=""
+while getopts "hvrb:" arg; do
+	case "${arg}" in
+		h )
+			echo "${SYNOPSIS}"
+			exit 0
+			;;
+		r )
+			readonly="-r"
+			;;
+		b )
+			base=${OPTARG}
+			;;
+		v )
+			echo "${prog} version ${VERSION}"
+			exit 0
+			;;
+		* )
+			echo "${USAGE}"
+			exit 1
+			;;
+	esac
+done
+
+shift $((OPTIND-1))
+
+if [ $# -ne 3 ] ; then
+	echo "$USAGE"
+	exit 1
+fi
+
+mountPoint=${1%/}
+prefix=${2%/}
+cnt=$(($3+1))
+
+echo "MountPoint = ${mountPoint}";
+
+############################################################################
+### Verify That The Path Is Either A Valid BtrFS MountPoint Or SubVolume ###
+############################################################################
+
+mount -t btrfs | cut -d " " -f 3 | grep "^${mountPoint}$" > /dev/null
+if [ $? -ne 0 ] ; then
+        btrfs subvolume show $mountPoint | grep "${mountPoint}$" > /dev/null
+        if [ $? -ne 0 ] ; then
+                echo "Error: ${mountPoint} is not a btrfs mountpoint (or old version of btrfs-tools, try > 0.19)"
+                exit 1
+        fi
+fi
+
+##############################
+### Set Snapshot Directory ###
+##############################
+
+# Remove trailing slashes
+shopt -s extglob 
+base=${base%%*(/)}
+shopt -u extglob
+
+if [ "x$base" == "x" ]
+then
+    base="${mountPoint}/.snapshots"
+else
+    base="${base}${mountPoint}"
+fi
+
+echo "Base = ${base}";
+
+###################################################
+### Create Base Snapshot Directory If Not Exist ###
+###################################################
+
+if [ ! -d "${base}" ]; then
+	logger -p ${LOG_FACILITY}.info -t ${prog} "Creating $base"
+	out="mkdir -p '${base}'"
+	echo "Executing $out"
+	eval $out
+fi
+
+###################################
+### Create Snapshot Folder Name ###
+###################################
+
+base=$(readlink -f $base)
+
+if [ ${prefix} == VFS ]; then
+	nd='-'
+	snapname=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
+	prefix='@GMT'
+else
+	nd='_'
+	snapname=${prefix}${nd}$(date +%Y-%m-%d_%H.%M.%S)
+fi
+
+#########################################
+### Check If There Is A Last Snapshot ###
+#########################################
+
+oldIFS="$IFS"
+IFS='
+'
+snapshotWildcardPath="${base}/${prefix}${nd}*"
+{ 
+	comp=($(ls -d ${snapshotWildcardPath} | tail -n 1 ))
+} &> /dev/null
+IFS="$oldIFS"
+
+SNAPSHOT_LAST=${comp[0]};
+
+echo "LastSnapshot = ${SNAPSHOT_LAST}"
+
+if [ -z "${SNAPSHOT_LAST}" ]; then
+	echo "No LastSnapshot..."
+	createSnapshot
+	deleteOlderSnapshots
+	syncBtrfs
+	exit $?
+fi
+
+####################################################################################
+### Checking If MountPoint Contains Any New Data/Files Compared To Last Snapshot ###
+####################################################################################
+
+OLD_TRANSID=`btrfs subvolume find-new "$SNAPSHOT_LAST" 9999999`
+OLD_TRANSID=${OLD_TRANSID#transid marker was }
+[ -n "$OLD_TRANSID" -a "$OLD_TRANSID" -gt 0 ] || usage "Failed to find generation for $SNAPSHOT_NEW"
+
+echo "LastSnapshot TransID is $OLD_TRANSID"
+echo "Comparing MountPoint and LastSnapshot..."
+
+oldIFS="$IFS"
+IFS='
+'
+changes=`/sbin/btrfs subvolume find-new ${mountPoint} $OLD_TRANSID`
+#changes=`/sbin/btrfs subvolume find-new ${mountPoint} $OLD_TRANSID | sed '$d' | cut -f17- -d' ' | sort | uniq`
+IFS="$oldIFS"
+
+#echo "${changes}"
+count=$(grep -o "inode" <<< "$changes" | wc -l)
+echo "$count changes... "
+
+if [ "${count}" -eq "0" ]; then
+	echo "Not Creating Snapshot..."
+	deleteOlderSnapshots
+	syncBtrfs
+else
+	echo "Creating Snapshot..."
+	createSnapshot
+	deleteOlderSnapshots
+	syncBtrfs
+fi
+
+exit $?
