@@ -27,11 +27,11 @@ IFS=""
 
 createSnapshot() 
 {
-		out="/sbin/btrfs subvol snapshot ${readonly} '${mountPoint}' '${base}/${snapshotName}' 2>&1"
+		out="/sbin/btrfs subvol snapshot ${readonly} \"${mountPoint}\" \"${base}/${snapshotName}\" 2>&1"
 		#echo "Executing $out"
 		eval $out
 		
-		#$out="/usr/bin/touch '${base}/${snapshotName}' 2>&1"
+		#$out="/usr/bin/touch \"${base}/${snapshotName}\" 2>&1"
 		#eval $out
 
 	if [ $? -eq 0 ] ; then
@@ -43,7 +43,7 @@ createSnapshot()
 
 deleteOlderSnapshots()
 {
-	echo "Deleting old snapshots from $snapshotWildcardPath..."
+	echo "Deleting Snapshots from $snapshotWildcardPath..."
 	ls -dr $snapshotWildcardPath | tail -n +${cnt} | while read snap ; do
 		echo "Deleting ${snap}"
 		out=`/sbin/btrfs subvolume delete ${snap} 2>&1`
@@ -194,7 +194,7 @@ echo "Base = ${base}";
 
 if [ ! -d "${base}" ]; then
 	logger -p ${LOG_FACILITY}.info -t ${prog} "Creating $base"
-	out="mkdir -p '${base}'"
+	out="mkdir -p \"${base}\""
 	echo "Executing $out"
 	eval $out
 fi
@@ -206,11 +206,11 @@ fi
 base=$(readlink -f $base)
 
 if [ ${prefix} == VFS ]; then
-	nd='-'
+	nd="-"
 	snapshotName=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
-	prefix='@GMT'
+	prefix="@GMT"
 else
-	nd='_'
+	nd="_"
 	snapshotName=${prefix}${nd}$(date +%Y-%m-%d_%H.%M.%S)
 fi
 
@@ -219,8 +219,8 @@ fi
 #################################################################
 
 oldIFS="$IFS"
-IFS='
-'
+IFS="
+"
 snapshotWildcardPath="${base}/${prefix}${nd}*"
 { 
 	comp=($(ls -d ${snapshotWildcardPath} | tail -n 1 ))
@@ -255,10 +255,10 @@ echo "Comparing MountPoint and LastSnapshot..."
 ##########################################################
 
 oldIFS="$IFS"
-IFS='
-'
+IFS="
+"
 changes=`/sbin/btrfs subvolume find-new ${mountPoint} $OLD_TRANSID`
-#changes=`/sbin/btrfs subvolume find-new ${mountPoint} $OLD_TRANSID | sed '$d' | cut -f17- -d' ' | sort | uniq`
+#changes=`/sbin/btrfs subvolume find-new ${mountPoint} $OLD_TRANSID | sed "$d" | cut -f17- -d" " | sort | uniq`
 IFS="$oldIFS"
 
 #echo "${changes}"
