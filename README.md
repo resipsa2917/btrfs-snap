@@ -52,7 +52,7 @@ OS Support
 Tested on
 
 * Fedora 21/22
-* Centos 7
+* CentOS 7
 
 License
 -------
