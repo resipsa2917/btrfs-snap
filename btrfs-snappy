@@ -8,6 +8,7 @@ PATH=/usr/lib64/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/b
 # Copyright (C) 2010 Birger Monsen birger@birger.sh
 # Copyright (C) 2013 James FitzGibbon james@nadt.net
 # Copyright (C) 2014 Brian Kloppenberg
+# Copyright (C) 2014 artfulrobot (http://serverfault.com/users/96883/artfulrobot)
 # Copyright (C) 2015 David Carriere redwoodcare@hotmail.com
 #
 # This program is distributed under the GNU General Public License
@@ -26,11 +27,11 @@ IFS=""
 
 createSnapshot() 
 {
-		out="/sbin/btrfs subvol snapshot ${readonly} '${mountPoint}' '${base}/${snapname}' 2>&1"
+		out="/sbin/btrfs subvol snapshot ${readonly} '${mountPoint}' '${base}/${snapshotName}' 2>&1"
 		#echo "Executing $out"
 		eval $out
 		
-		#$out="/usr/bin/touch '${base}/${snapname}' 2>&1"
+		#$out="/usr/bin/touch '${base}/${snapshotName}' 2>&1"
 		#eval $out
 
 	if [ $? -eq 0 ] ; then
@@ -206,11 +207,11 @@ base=$(readlink -f $base)
 
 if [ ${prefix} == VFS ]; then
 	nd='-'
-	snapname=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
+	snapshotName=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
 	prefix='@GMT'
 else
 	nd='_'
-	snapname=${prefix}${nd}$(date +%Y-%m-%d_%H.%M.%S)
+	snapshotName=${prefix}${nd}$(date +%Y-%m-%d_%H.%M.%S)
 fi
 
 #################################################################
