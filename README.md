@@ -1,7 +1,7 @@
 btrfs-snappy
 ============
 
-btrfs-snappy creates and maintains the history of snapshots of BtrFS filesystems by taking snapshots of a BtrFS mountpoint or subvolume ONLY when there are new or changed files NOT deleted or renamed files.
+btrfs-snappy creates and maintains the history of snapshots of BtrFS filesystems by taking snapshots of a BtrFS mountpoint or subvolume ONLY when there are new or changed files BUT NOT deleted or renamed files.
 
 Installation
 ------------
@@ -10,7 +10,7 @@ Place btrfs-snappy in /usr/sbin and make it executable, "chmod +x /usr/sbin/btrf
 Features:
 ---------
 
-* only takes snapshots when there are important data changes to your files (changed data in your files or the creation of non-empty new files, but -not- deleted or renamed files/folders)
+* only takes snapshots when there are important data changes to your files (changed data in your files or the creation of non-empty new files, but not deleted or renamed files/folders -- i.e., data changes to a data block, not changes to an inode)
 * can snapshot inside of the filesystem or rooted in a base directory
 * can purge old snapshots when too many exist
 * can keep multiple snapshot schedules for the same filesystem
