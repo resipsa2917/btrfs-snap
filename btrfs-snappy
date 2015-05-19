@@ -198,9 +198,9 @@ if [ ! -d "${base}" ]; then
 	eval $out
 fi
 
-###################################
-### Create Snapshot Folder Name ###
-###################################
+################################
+### Set Snapshot Folder Name ###
+################################
 
 base=$(readlink -f $base)
 
