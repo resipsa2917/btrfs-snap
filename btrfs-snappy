@@ -238,9 +238,9 @@ if [ -z "${SNAPSHOT_LAST}" ]; then
 	exit $?
 fi
 
-####################################################################################
-### Checking If MountPoint Contains Any New Data/Files Compared To Last Snapshot ###
-####################################################################################
+#################################################################################
+### Check If MountPoint Contains Any New Data/Files Compared To Last Snapshot ###
+#################################################################################
 
 OLD_TRANSID=`btrfs subvolume find-new "$SNAPSHOT_LAST" 9999999`
 OLD_TRANSID=${OLD_TRANSID#transid marker was }
@@ -248,6 +248,10 @@ OLD_TRANSID=${OLD_TRANSID#transid marker was }
 
 echo "LastSnapshot TransID is $OLD_TRANSID"
 echo "Comparing MountPoint and LastSnapshot..."
+
+##########################################################
+### Count Changes Between MountPoint and LastSnapshot  ###
+##########################################################
 
 oldIFS="$IFS"
 IFS='
@@ -259,6 +263,10 @@ IFS="$oldIFS"
 #echo "${changes}"
 count=$(grep -o "inode" <<< "$changes" | wc -l)
 echo "$count changes... "
+
+#######################################################################
+### If No Changes, Don't Create Snapshot, Otherwise Create Snapshot ###
+#######################################################################
 
 if [ "${count}" -eq "0" ]; then
 	echo "Not Creating Snapshot..."
