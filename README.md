@@ -10,7 +10,7 @@ Place btrfs-snappy in /usr/sbin and make it executable, "chmod +x /usr/sbin/btrf
 Features:
 ---------
 
-* only takes snapshots when there are important changes to your files (new or changed files, but not deleted or renamed files)
+* only takes snapshots when there are important data changes to your files (non-empty new files or changed data in files, but not deleted or renamed files/folders)
 * can snapshot inside of the filesystem or rooted in a base directory
 * can purge old snapshots when too many exist
 * can keep multiple snapshot schedules for the same filesystem
