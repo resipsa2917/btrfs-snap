@@ -10,7 +10,7 @@ Place btrfs-snappy in /usr/sbin and make it executable, "chmod +x /usr/sbin/btrf
 Features:
 ---------
 
-* only takes snapshots when there are important changes to your files (changed data in your files or the creation of non-empty new files, but not deleted or renamed files/folders).  That is, data changes to data blocks, but not changes to an inode.
+* only takes snapshots when there are important changes to your files (changed data in your files or the creation of non-empty new files, but not deleted or renamed files/folders).  In other words, it only takes a snapshot when there are changes to one or more data blocks irrespective of any changes to any inode(s).
 * can snapshot inside of the filesystem or rooted in a base directory.
 * can purge old snapshots when too many exist.
 * can keep multiple snapshot schedules for the same filesystem.
