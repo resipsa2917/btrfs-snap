@@ -1,7 +1,7 @@
 btrfs-snappy
 ============
 
-btrfs-snappy creates and maintains the history of snapshots of BtrFS filesystems by taking snapshots of a BtrFS mountpoint or subvolume ONLY when there are new or changed files NOT deleted files or renamed files.
+btrfs-snappy creates and maintains the history of snapshots of BtrFS filesystems by taking snapshots of a BtrFS mountpoint or subvolume ONLY when there are new or changed files NOT deleted or renamed files.
 
 Installation
 ------------
