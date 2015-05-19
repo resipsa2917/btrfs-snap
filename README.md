@@ -43,8 +43,8 @@ Cron Examples:
 
 The above cronjob would
 
-* Create a snapshot of "/My Documents" every 5 minutes, keeping 30 generations in "/Snapshots/My Documents"
-* Create a snapshot of /home every day, keeping 7 generations in /Snapshots/home
+* Assess whether to create a snapshot of "/My Documents" every 5 minutes, taking the snapshot only when there is changed data, keeping 30 generations in "/Snapshots/My Documents"
+* Assess whether to create a snapshot of /home every day, taking the snapshot only when there is changed data, keeping 7 generations in /Snapshots/home
 
 OS Support
 ----------
