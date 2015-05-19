@@ -51,7 +51,7 @@ OS Support
 
 Tested on
 
-* Fedora 22
+* Fedora 21/22
 * Centos 7
 
 License
