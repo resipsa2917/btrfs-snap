@@ -37,7 +37,7 @@ Cron Examples:
 --------------
 
 ```cron
-*/5   *   *   *   *   btrfs-snappy -r -b "/Snapshots/" "/My Documents/" hourly 30;
+*/5   *   *   *   *   btrfs-snappy -r -b "/Snapshots/" "/My Documents" hourly 30;
 0     0   *   *   *   btrfs-snappy -r -b /Snapshots /home daily 7;
 ```
 
