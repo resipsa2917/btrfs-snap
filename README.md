@@ -5,7 +5,7 @@ btrfs-snappy smartly creates and maintains a history of snapshots of BtrFS files
 
 Installation:
 -------------
-Place btrfs-snappy in /usr/sbin and make it executable, "chmod +x /usr/sbin/btrfs-snappy"
+Place btrfs-snappy in /usr/local/sbin and make it executable, "chmod +x /usr/local/sbin/btrfs-snappy"
 
 Features:
 ---------
