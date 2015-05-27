@@ -151,8 +151,8 @@ if [ $# -ne 3 ] ; then
 	exit 1
 fi
 
-mountPoint=$(echo $1 | perl -pe 's#[^/]/$#$1#')
-prefix=$(echo $2 | perl -pe 's#[^/]/$#$2#')
+mountPoint=${1%/}
+prefix=${2%/}
 cnt=$(($3+1))
 
 echo "MountPoint = ${mountPoint}";
