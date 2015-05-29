@@ -151,8 +151,13 @@ if [ $# -ne 3 ] ; then
 	exit 1
 fi
 
-mountPoint=${1%/}
-prefix=${2%/}
+if [ ${#1} -gt 1 ] ; then
+	mountPoint=${1%/}
+else
+	mountPoint=${1%}
+fi
+
+prefix=${2%}
 cnt=$(($3+1))
 
 echo "MountPoint = ${mountPoint}";
