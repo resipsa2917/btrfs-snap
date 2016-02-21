@@ -27,12 +27,15 @@ IFS=""
 
 createSnapshot() 
 {
-		out="/sbin/btrfs subvol snapshot ${readonly} \"${mountPoint}\" \"${base}/${snapshotName}\" 2>&1"
-		#echo "Executing $out"
-		eval $out
+	echo "Setting Folder Date/Time..."
+	/usr/bin/touch "${mountPoint}" 2>&1
+	
+	out="/sbin/btrfs subvol snapshot ${readonly} \"${mountPoint}\" \"${base}/${snapshotName}\" 2>&1"
+	#echo "Executing $out"
+	eval $out
 		
-		#$out="/usr/bin/touch \"${base}/${snapshotName}\" 2>&1"
-		#eval $out
+	#$out="/usr/bin/touch \"${base}/${snapshotName}\" 2>&1"
+	#eval $out
 
 	if [ $? -eq 0 ] ; then
 		logger -p ${LOG_FACILITY}.info -t ${prog} "${out}"
