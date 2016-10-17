@@ -74,4 +74,4 @@ Support for snapshotting unmounted btrfs subvolumes by Brian Kloppenborg (https:
 
 Check for changes between current mountpoint or subvolume and last snapshot by artfulrobot (http://serverfault.com/users/96883/artfulrobot)
 
-Take snaphots only when there are new or changed files, but not deleted or renamed files/folders by David Carriere (<redwoodcare@hotmail.com>)
+Take snaphots only when there are new or changed files, but not deleted or renamed files/folders by Mr. Carriere (<redwoodcare@hotmail.com>)
