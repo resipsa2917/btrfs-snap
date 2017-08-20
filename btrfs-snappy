@@ -64,6 +64,19 @@ syncBtrfs()
 	/usr/bin/sync
 }
 
+isBtrfsSubvolume() 
+{
+    local dir="${mountPoint}"
+    [ "$(stat -f --format="%T" "$dir")" == "btrfs" ] || return 1
+    inode="$(stat --format="%i" "$dir")"
+    case "$inode" in
+        2|256)
+            return 0;;
+        *)
+            return 1;;
+    esac
+}
+
 #############
 ### Usage ###
 #############
@@ -171,9 +184,9 @@ echo "MountPoint = ${mountPoint}";
 
 mount -t btrfs | cut -d " " -f 3 | grep "^${mountPoint}$" > /dev/null
 if [ $? -ne 0 ] ; then
-        btrfs subvolume show $mountPoint | grep "${mountPoint}$" > /dev/null
+        isBtrfsSubvolume > /dev/null
         if [ $? -ne 0 ] ; then
-                echo "Error: ${mountPoint} is not a btrfs mountpoint (or old version of btrfs-tools, try > 0.19)"
+                echo "Error: ${mountPoint} is not a btrfs mountpoint or subvolume..."
                 exit 1
         fi
 fi
